@@ -1,5 +1,5 @@
 {
-  "name": "blinkkiiit-clone",
+  "name": "server",
   "version": "1.0.0",
   "description": "",
   "license": "ISC",
@@ -10,6 +10,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
     "dev": "nodemon index.js"
+  },
+  "engines": {
+    "node": "20.x"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
