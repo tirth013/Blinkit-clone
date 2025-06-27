@@ -214,7 +214,7 @@ const uploadAvatar = asyncHandler(async (req, res) => {
     });
   }
 
-  const updateUser = await userModel.findByIdAndUpdate(
+  const updateUser = await UserModel.findByIdAndUpdate(
     userId,
     { avatar: upload.url },
     { new: true }
@@ -265,7 +265,7 @@ const updateUserDetails = asyncHandler(async (req, res) => {
       message: "No valid fields provided for update.",
     });
   }
-  const updateUser = await userModel.findByIdAndUpdate(userId, updateFields, {
+  const updateUser = await UserModel.findByIdAndUpdate(userId, updateFields, {
     new: true,
   });
   if (!updateUser) {
@@ -290,7 +290,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
       .json({ success: false, message: "Email is required." });
   }
   try {
-    const user = await userModel.findOne({ email });
+    const user = await UserModel.findOne({ email });
     // For security, always return success even if user not found
     if (!user) {
       return res.json({
@@ -301,7 +301,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
     const otp = generateOTP();
     const expireTime = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes from now
 
-    await userModel.findByIdAndUpdate(user._id, {
+    await UserModel.findByIdAndUpdate(user._id, {
       forgot_password_otp: otp,
       forgot_password_expiry: expireTime.toISOString(),
     });
@@ -336,7 +336,7 @@ const verifyForgotPasswordOtp = asyncHandler(async (req, res) => {
       .json({ success: false, message: "OTP and email are required." });
   }
 
-  const user = await userModel.findOne({ email });
+  const user = await UserModel.findOne({ email });
   if (!user || !user.forgot_password_otp || !user.forgot_password_expiry) {
     return res
       .status(400)
@@ -359,7 +359,7 @@ const verifyForgotPasswordOtp = asyncHandler(async (req, res) => {
   }
 
   // Optionally, clear OTP fields after successful verification
-  await userModel.findByIdAndUpdate(user._id, {
+  await UserModel.findByIdAndUpdate(user._id, {
     forgot_password_otp: null,
     forgot_password_expiry: null,
   });
@@ -386,7 +386,7 @@ const resetPassword = asyncHandler(async (req, res) => {
       .json({ success: false, message: "Passwords do not match." });
   }
 
-  const user = await userModel.findOne({ email });
+  const user = await UserModel.findOne({ email });
   if (!user) {
     return res
       .status(400)
@@ -405,7 +405,7 @@ const resetPassword = asyncHandler(async (req, res) => {
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-  await userModel.findByIdAndUpdate(user._id, {
+  await UserModel.findByIdAndUpdate(user._id, {
     password: hashedPassword,
     forgot_password_otp: null,
     forgot_password_expiry: null,
