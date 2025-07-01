@@ -450,6 +450,23 @@ const refreshToken = asyncHandler(async (req, res) => {
     return res.status(401).json({ success: false, message: "Invalid or expired refresh token.", error: err.message });
   }
 });
+
+/**
+Returns the current user's details.
+@route GET /api/user/details
+*/
+const getUserDetails = asyncHandler(async (req, res) => {
+  const userId = req.user?._id || req.userId;
+  if (!userId) {
+    return res.status(401).json({ success: false, message: "Unauthorized: User ID missing." });
+  }
+  const user = await UserModel.findById(userId).select('-password');
+  if (!user) {
+    return res.status(404).json({ success: false, message: "User not found." });
+  }
+  return res.json({ success: true, data: user });
+});
+
 module.exports = {
   registerUser,
   verifyEmail,
@@ -461,4 +478,5 @@ module.exports = {
   verifyForgotPasswordOtp,
   resetPassword,
   refreshToken,
+  getUserDetails,
 };

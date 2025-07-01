@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { FaShoppingCart } from "react-icons/fa";
+import { FaShoppingCart, FaChevronDown } from "react-icons/fa";
 import Search from "../components/Search";
 import axios from "axios";
 import SummaryApi, { baseURL } from "../common/SummaryApi";
 import { Link, useNavigate } from "react-router-dom";
+import UserMenu from "./userMenu.jsx";
 
 const Header = () => {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
 
   useEffect(() => {
     // Check login state from localStorage
@@ -38,7 +40,7 @@ const Header = () => {
   };
 
   return (
-    <header className="h-20 shadow-md bg-gray-900 text-white flex items-center justify-between px-4 md:px-8 border-b">
+    <header className="h-20 shadow bg-white text-gray-900 flex items-center justify-between w-full px-6 border-b border-gray-200" style={{ background: 'white' }}>
       {/* Logo/Brand */}
       <div className="flex items-center gap-2 flex-shrink-0">
         <Link to="/">
@@ -49,29 +51,31 @@ const Header = () => {
       <div className="flex-1 flex justify-center mx-4">
         <Search />
       </div>
-      {/* Navigation and Cart */}
-      <div className="flex items-center gap-6 flex-shrink-0">
-        <nav className="hidden md:flex gap-6 font-medium">
-          <a href="#" className="hover:text-yellow-400 transition-colors">Home</a>
-          <a href="#" className="hover:text-yellow-400 transition-colors">Categories</a>
-          <a href="#" className="hover:text-yellow-400 transition-colors">Offers</a>
-          {isLoggedIn ? null : (
-            <Link to="/login" className="hover:text-yellow-400 transition-colors">Login</Link>
-          )}
-        </nav>
-        <button className="relative text-2xl text-gray-300 hover:text-yellow-400 transition-colors ml-2">
-          <FaShoppingCart />
-          {/* Cart badge */}
-          <span className="absolute -top-2 -right-2 bg-yellow-400 text-gray-900 text-xs rounded-full px-1.5 py-0.5">0</span>
-        </button>
-        {isLoggedIn && (
+      {/* Account & Cart */}
+      <div className="flex items-center gap-6 flex-shrink-0 relative">
+        {/* Account Dropdown */}
+        <div className="relative">
           <button
-            onClick={handleLogout}
-            className="bg-yellow-400 text-gray-900 font-bold px-4 py-1 rounded-full hover:bg-yellow-300 transition-colors ml-4"
+            className="flex items-center gap-1 px-4 py-2 rounded hover:bg-[rgb(229,236,245)] text-gray-900 transition-colors focus:outline-none border border-gray-200"
+            onClick={() => setAccountOpen((prev) => !prev)}
+            onBlur={() => setTimeout(() => setAccountOpen(false), 150)}
+            tabIndex={0}
           >
-            Logout
+            <span className="font-medium">Account</span>
+            <FaChevronDown className="text-xs mt-0.5" />
           </button>
-        )}
+          {accountOpen && (
+            <div className="absolute left-0 mt-2 w-30 bg-white rounded shadow-lg z-20 animate-fade-in border border-gray-200">
+              <UserMenu />
+            </div>
+          )}
+        </div>
+        {/* My Cart Button */}
+        <Link to="/cart" className="relative flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded shadow transition-colors">
+          <FaShoppingCart className="text-lg" />
+          <span>My Cart</span>
+          <span className="absolute -top-2 -right-2 bg-yellow-400 text-gray-900 text-xs rounded-full px-1.5 py-0.5 border-2 border-white">0</span>
+        </Link>
       </div>
     </header>
   );

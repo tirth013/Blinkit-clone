@@ -8,6 +8,10 @@ import ForgotPassword from "../pages/ForgotPassword";
 import OtpVerification from "../pages/OtpVerification";
 import Logout from "../pages/Logout";
 import ResetPassword from "../pages/ResetPassword";
+import Profile from "../pages/Profile";
+import Dashboard from "../layouts/Dashboard";
+import MyOrders from "../pages/MyOrders";
+import Address from "../pages/Address";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -19,32 +23,50 @@ const router = createBrowserRouter([
       },
       {
         path: "search",
-        element: <SearchPage />
+        element: <SearchPage />,
       },
       {
         path: "register",
-        element: <Register />
+        element: <Register />,
       },
       {
         path: "login",
-        element: <Login />
+        element: <Login />,
       },
       {
         path: "forgot-password",
-        element: <ForgotPassword />
+        element: <ForgotPassword />,
       },
       {
         path: "otp-verification",
-        element: <OtpVerification />
+        element: <OtpVerification />,
       },
       {
         path: "logout",
-        element: <Logout />
+        element: <Logout />,
       },
       {
         path: "reset-password",
-        element: <ResetPassword />
-      }
+        element: <ResetPassword />,
+      },
+      {
+        path: "dashboard",
+        element: <Dashboard />,
+        children: [
+          {
+            path: "profile",
+            element: <Profile />,
+          },
+          {
+            path: "myorders",
+            element: <MyOrders />,
+          },
+          {
+            path: "address",
+            element: <Address />,
+          },
+        ],
+      },
     ],
   },
 ]);
