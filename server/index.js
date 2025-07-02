@@ -6,6 +6,7 @@ const morgan = require("morgan");
 const helmet = require("helmet");
 const connectDb = require("./config/dbConnection");
 const userRouter = require("./routes/userRoute");
+const categoryRouter = require("./routes/categoryRoute");
 
 // Load environment variables
 dotenv.config();
@@ -33,7 +34,9 @@ app.use(
 app.get("/", (req, res) => {
   res.json({ message: "Welcome!!!" });
 });
+
 app.use("/api/user", userRouter);
+app.use("/api/category", categoryRouter);
 
 // Global error handler middleware
 app.use((err, req, res, next) => {

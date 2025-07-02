@@ -50,7 +50,7 @@ const UserMenu = () => {
             My Account
           </div>
           <div className="text-xs font-semibold text-grey-700 truncate max-w-[180px] py-1 rounded">
-            <span> {user.name ||user.email || user.mobile}</span>
+            <span> {user.name || user.email || user.mobile}</span>
           </div>
         </div>
       </div>
@@ -61,6 +61,31 @@ const UserMenu = () => {
           className="px-4 py-2 hover:bg-gray-100 transition-colors text-sm text-gray-900 text-left font-medium"
         >
           Profile
+        </Link>
+        <Link
+          to="/dashboard/category"
+          className="px-4 py-2 hover:bg-gray-100 transition-colors text-sm text-gray-900 text-left font-medium"
+        >
+          Category
+        </Link>
+        <Link
+          to="/dashboard/subcategory"
+          className="px-4 py-2 hover:bg-gray-100 transition-colors text-sm text-gray-900 text-left font-medium"
+        >
+          Sub Category
+        </Link>
+        <Link
+          to="/dashboard/upload-product"
+          className="px-4 py-2 hover:bg-gray-100 transition-colors text-sm text-gray-900 text-left font-medium"
+        >
+          Upload Product
+        </Link>
+
+        <Link
+          to="/dashboard/product"
+          className="px-4 py-2 hover:bg-gray-100 transition-colors text-sm text-gray-900 text-left font-medium"
+        >
+          Product
         </Link>
         <Link
           to="/dashboard/myorders"

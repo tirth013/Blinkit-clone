@@ -6,7 +6,6 @@ import { useSelector } from 'react-redux'
 const Dashboard = () => {
   const user = useSelector(state => state.user)
 
-  console.log("user dashboard",user)
   return (
     <section className="bg-[rgb(229,236,245)] min-h-screen w-full py-8">
       <div className="w-full px-0 grid lg:grid-cols-[260px,1fr] gap-6">

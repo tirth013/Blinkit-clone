@@ -253,7 +253,14 @@ const updateUserDetails = asyncHandler(async (req, res) => {
 
   let updateFields = {};
   if (name) updateFields.name = name;
-  if (email) updateFields.email = email;
+  if (email) {
+    // Check if email is already used by another user
+    const existing = await UserModel.findOne({ email });
+    if (existing && String(existing._id) !== String(userId)) {
+      return res.status(409).json({ success: false, message: "Email is already in use by another account." });
+    }
+    updateFields.email = email;
+  }
   if (mobile) updateFields.mobile = mobile;
   if (password) {
     const salt = await bcrypt.genSalt(10);
@@ -267,7 +274,7 @@ const updateUserDetails = asyncHandler(async (req, res) => {
   }
   const updateUser = await UserModel.findByIdAndUpdate(userId, updateFields, {
     new: true,
-  });
+  }).select('-password');
   if (!updateUser) {
     return res.status(404).json({ success: false, message: "User not found." });
   }
