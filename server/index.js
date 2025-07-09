@@ -7,6 +7,7 @@ const helmet = require("helmet");
 const connectDb = require("./config/dbConnection");
 const userRouter = require("./routes/userRoute");
 const categoryRouter = require("./routes/categoryRoute");
+const uploadRouter = require("./routes/uploadRouter");
 
 // Load environment variables
 dotenv.config();
@@ -21,7 +22,8 @@ app.use(
     origin: process.env.FRONTEND_URL,
   })
 );
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(cookieParser());
 app.use(morgan("combined"));
 app.use(
@@ -37,6 +39,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/user", userRouter);
 app.use("/api/category", categoryRouter);
+app.use("/api/file", uploadRouter);
 
 // Global error handler middleware
 app.use((err, req, res, next) => {

@@ -1,10 +1,10 @@
 const express = require("express");
-const { addCategoryController } = require("../controller/categoryController");
+const { addCategoryController, getCategoryController } = require("../controller/categoryController");
 const auth = require("../middleware/auth");
-const upload = require("../middleware/multer");
 const router = express.Router();
 
-// Use multer middleware for image upload
-router.route("/add-category").post(auth, upload.single('image'), addCategoryController);
+// Route for adding a category (expects name and image string in body)
+router.post("/add-category", auth, addCategoryController);
+router.get("/get", getCategoryController);
 
 module.exports = router;

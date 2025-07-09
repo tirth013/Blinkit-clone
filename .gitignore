@@ -12,7 +12,6 @@ yarn-error.log*
 
 # Environment files
 .env
-.env.*
 
 # Build output
 client/dist/

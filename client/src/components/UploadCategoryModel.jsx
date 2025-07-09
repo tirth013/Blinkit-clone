@@ -1,16 +1,17 @@
 import React, { useState } from "react";
 import { IoClose } from "react-icons/io5";
-import axios from "axios";
+import Axios from "../utils/Axios";
 import SummaryApi, { baseURL } from "../common/SummaryApi";
+import uploadImage from "../utils/uploadImage";
+import { toast } from "react-hot-toast";
 
-const UploadCategoryModel = ({ close }) => {
+const UploadCategoryModel = ({ close,fetchData }) => {
   const [data, setData] = useState({
     name: "",
     image: null,
   });
   const [imagePreview, setImagePreview] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const handleOnChange = (e) => {
     const { name, value, type, files } = e.target;
@@ -36,26 +37,30 @@ const UploadCategoryModel = ({ close }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
+    const toastId = toast.loading("Uploading category...");
     try {
-      const formData = new FormData();
-      formData.append("name", data.name);
-      formData.append("image", data.image);
-      await axios.post(
-        baseURL + SummaryApi.addCategory.url,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-          withCredentials: true,
-        }
+      // 1. Upload the image using the utility function
+      const uploadRes = await uploadImage(data.image);
+      if (!uploadRes.data || !uploadRes.data.image) {
+        throw new Error(uploadRes.response?.data?.message || "Image upload failed");
+      }
+      const imageString = uploadRes.data.image;
+
+      // 2. Add the category
+      await Axios.post(
+        SummaryApi.addCategory.url,
+        { name: data.name, image: imageString }
       );
+
       setLoading(false);
+      toast.success("Category added successfully!", { id: toastId });
+      setData({ name: "", image: null });
+      setImagePreview(null);
       close();
+      fetchData()
     } catch (err) {
       setLoading(false);
-      setError(err.response?.data?.message || "Failed to upload category");
+      toast.error(err.response?.data?.message || err.message || "Failed to upload category", { id: toastId });
     }
   };
 
@@ -100,6 +105,7 @@ const UploadCategoryModel = ({ close }) => {
               Image
             </label>
             <input
+              disabled = {!data.name}
               type="file"
               id="categoryImage"
               name="image"
@@ -116,7 +122,6 @@ const UploadCategoryModel = ({ close }) => {
               />
             )}
           </div>
-          {error && <div className="text-red-500 text-sm">{error}</div>}
           <button
             type="submit"
             className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-semibold py-2 rounded-lg shadow transition-colors duration-200 mt-2"
