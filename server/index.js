@@ -8,6 +8,8 @@ const connectDb = require("./config/dbConnection");
 const userRouter = require("./routes/userRoute");
 const categoryRouter = require("./routes/categoryRoute");
 const uploadRouter = require("./routes/uploadRouter");
+const subCategoryRouter = require("./routes/subCategoryRoute");
+const productRouter = require("./routes/productRoute");
 
 // Load environment variables
 dotenv.config();
@@ -22,8 +24,8 @@ app.use(
     origin: process.env.FRONTEND_URL,
   })
 );
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ limit: '10mb', extended: true }));
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ limit: "10mb", extended: true }));
 app.use(cookieParser());
 app.use(morgan("combined"));
 app.use(
@@ -40,6 +42,8 @@ app.get("/", (req, res) => {
 app.use("/api/user", userRouter);
 app.use("/api/category", categoryRouter);
 app.use("/api/file", uploadRouter);
+app.use("/api/subcategory", subCategoryRouter);
+app.use("/api/product", productRouter);
 
 // Global error handler middleware
 app.use((err, req, res, next) => {

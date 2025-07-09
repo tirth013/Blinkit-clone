@@ -5,6 +5,7 @@ import { logout as logoutAction } from "../store/userSlice";
 import axios from "axios";
 import SummaryApi, { baseURL } from "../common/SummaryApi";
 import Divider from "./Divider";
+import isAdmin from "../utils/isAdmin";
 
 const UserMenu = () => {
   const user = useSelector((state) => state.user);
@@ -51,6 +52,7 @@ const UserMenu = () => {
           </div>
           <div className="text-xs font-semibold text-grey-700 truncate max-w-[180px] py-1 rounded">
             <span> {user.name || user.email || user.mobile}</span>
+            <span>{user.role === "ADMIN" ? "(admin)" : ""}</span>
           </div>
         </div>
       </div>
@@ -62,31 +64,42 @@ const UserMenu = () => {
         >
           Profile
         </Link>
-        <Link
-          to="/dashboard/category"
-          className="px-4 py-2 hover:bg-gray-100 transition-colors text-sm text-gray-900 text-left font-medium"
-        >
-          Category
-        </Link>
-        <Link
-          to="/dashboard/subcategory"
-          className="px-4 py-2 hover:bg-gray-100 transition-colors text-sm text-gray-900 text-left font-medium"
-        >
-          Sub Category
-        </Link>
-        <Link
-          to="/dashboard/upload-product"
-          className="px-4 py-2 hover:bg-gray-100 transition-colors text-sm text-gray-900 text-left font-medium"
-        >
-          Upload Product
-        </Link>
 
-        <Link
-          to="/dashboard/product"
-          className="px-4 py-2 hover:bg-gray-100 transition-colors text-sm text-gray-900 text-left font-medium"
-        >
-          Product
-        </Link>
+        {isAdmin(user.role) && (
+          <Link
+            to="/dashboard/category"
+            className="px-4 py-2 hover:bg-gray-100 transition-colors text-sm text-gray-900 text-left font-medium"
+          >
+            Category
+          </Link>
+        )}
+
+        {isAdmin(user.role) && (
+          <Link
+            to="/dashboard/subcategory"
+            className="px-4 py-2 hover:bg-gray-100 transition-colors text-sm text-gray-900 text-left font-medium"
+          >
+            Sub Category
+          </Link>
+        )}
+
+        {isAdmin(user.role) && (
+          <Link
+            to="/dashboard/upload-product"
+            className="px-4 py-2 hover:bg-gray-100 transition-colors text-sm text-gray-900 text-left font-medium"
+          >
+            Upload Product
+          </Link>
+        )}
+
+        {isAdmin(user.role) && (
+          <Link
+            to="/dashboard/product"
+            className="px-4 py-2 hover:bg-gray-100 transition-colors text-sm text-gray-900 text-left font-medium"
+          >
+            Product
+          </Link>
+        )}
         <Link
           to="/dashboard/myorders"
           className="px-4 py-2 hover:bg-gray-100 transition-colors text-sm text-gray-900 text-left font-medium"
@@ -97,7 +110,7 @@ const UserMenu = () => {
           to="/dashboard/address"
           className="px-4 py-2 hover:bg-gray-100 transition-colors text-sm text-gray-900 text-left font-medium"
         >
-          Saved Addresses
+          Save Address
         </Link>
         <button
           onClick={handleLogout}

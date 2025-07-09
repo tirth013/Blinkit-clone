@@ -1,10 +1,15 @@
 import React from "react";
 import UserMenu from "../components/userMenu";
-import { Outlet } from 'react-router-dom'
-import { useSelector } from 'react-redux'
+import { Outlet } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { useEffect } from "react";
 
 const Dashboard = () => {
-  const user = useSelector(state => state.user)
+  const user = useSelector((state) => state.user);
+
+  useEffect(() => {
+    console.log("user dashboard", user);
+  }, [user]);
 
   return (
     <section className="bg-[rgb(229,236,245)] min-h-screen w-full py-8">
@@ -23,7 +28,7 @@ const Dashboard = () => {
         </main>
       </div>
     </section>
-  )
-}
+  );
+};
 
-export default Dashboard
+export default Dashboard;
