@@ -83,9 +83,13 @@ const SummaryApi = {
     method: "delete",
   },
   // Product endpoints
-  addProduct: {
-    url: "/api/product/add-product",
+  createProduct: {
+    url: "/api/product/create",
     method: "post",
+  },
+  getProduct: {
+    url: "/api/product/get",
+    method: "get",
   },
 };
 

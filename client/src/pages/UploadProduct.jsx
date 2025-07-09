@@ -4,8 +4,6 @@ import SummaryApi from "../common/SummaryApi";
 import uploadImage from "../utils/uploadImage";
 import { toast } from "react-hot-toast";
 
-const UNIT_OPTIONS = ["kg", "g", "l", "ml", "pcs", "pack", "dozen"];
-
 const UploadProduct = () => {
   const [data, setData] = useState({
     name: "",
@@ -56,8 +54,9 @@ const UploadProduct = () => {
   // Handle image file input
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
-    setImageFiles(files);
-    setImagePreviews(files.map(file => URL.createObjectURL(file)));
+    setImageFiles(prev => [...prev, ...files]);
+    setImagePreviews(prev => [...prev, ...files.map(file => URL.createObjectURL(file))]);
+    e.target.value = ""; 
   };
 
   // Handle more_details dynamic fields
@@ -70,6 +69,12 @@ const UploadProduct = () => {
   };
   const addMoreDetail = () => setMoreDetailsList(list => [...list, { key: "", value: "" }]);
   const removeMoreDetail = (idx) => setMoreDetailsList(list => list.filter((_, i) => i !== idx));
+
+  // Remove image from preview and files
+  const handleRemoveImage = (idx) => {
+    setImageFiles(prev => prev.filter((_, i) => i !== idx));
+    setImagePreviews(prev => prev.filter((_, i) => i !== idx));
+  };
 
   // On submit
   const handleSubmit = async (e) => {
@@ -165,7 +170,17 @@ const UploadProduct = () => {
             />
             <div className="flex gap-2 mt-2">
               {imagePreviews.map((src, i) => (
-                <img key={i} src={src} alt="preview" className="h-16 w-16 object-cover rounded border" />
+                <div key={i} className="relative inline-block">
+                  <img src={src} alt="preview" className="h-16 w-16 object-cover rounded border" />
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveImage(i)}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white w-3 h-3 flex items-center justify-center text-xs shadow hover:bg-red-600"
+                    title="Remove image"
+                  >
+                    &times;
+                  </button>
+                </div>
               ))}
             </div>
           </div>
@@ -201,18 +216,15 @@ const UploadProduct = () => {
           </div>
           <div className="grid gap-1">
             <label className="font-sans">Unit</label>
-            <select
+            <input
+              type="text"
               name="unit"
               value={data.unit}
               onChange={handleChange}
               className="font-sans bg-blue-50 p-2 outline-none border focus-within:border-yellow-500 rounded"
+              placeholder="e.g. kg, g, l, ml, pcs, pack, dozen"
               required
-            >
-              <option value="" disabled>Select unit</option>
-              {UNIT_OPTIONS.map((u) => (
-                <option key={u} value={u}>{u}</option>
-              ))}
-            </select>
+            />
           </div>
           <div className="grid gap-1">
             <label className="font-sans">Stock</label>

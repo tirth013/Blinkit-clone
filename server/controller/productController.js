@@ -2,7 +2,7 @@ const Product = require("../models/productModel");
 const asyncHandler = require("express-async-handler");
 
 // Add Product
-const addProduct = asyncHandler(async (req, res) => {
+const createProductController = asyncHandler(async (req, res) => {
   const {
     name,
     image,
@@ -46,23 +46,19 @@ const addProduct = asyncHandler(async (req, res) => {
       .json({ success: false, message: "Category must be a non-empty array." });
   }
   if (!Array.isArray(subCategory) || subCategory.length === 0) {
-    return res
-      .status(400)
-      .json({
-        success: false,
-        message: "SubCategory must be a non-empty array.",
-      });
+    return res.status(400).json({
+      success: false,
+      message: "SubCategory must be a non-empty array.",
+    });
   }
 
   // Check for duplicate product name
   const existingProduct = await Product.findOne({ name });
   if (existingProduct) {
-    return res
-      .status(400)
-      .json({
-        success: false,
-        message: "Product with this name already exists.",
-      });
+    return res.status(400).json({
+      success: false,
+      message: "Product with this name already exists.",
+    });
   }
 
   const product = new Product({
@@ -86,4 +82,31 @@ const addProduct = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = { addProduct };
+const getProductController = asyncHandler(async (req, res) => {
+  let { page = 1, limit = 10, search = "" } = req.query;
+  page = parseInt(page);
+  limit = parseInt(limit);
+
+  const query = search ? { $text: { $search: search } } : {};
+
+  const skip = (page - 1) * limit;
+
+  const [data, totalCount] = await Promise.all([
+    Product.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate("category")
+      .populate("subCategory"),
+    Product.countDocuments(query),
+  ]);
+  return res.json({
+    message: "Product data",
+    success: true,
+    totalCount: totalCount,
+    totalNoPage: Math.ceil(totalCount / limit),
+    data: data,
+  });
+});
+
+module.exports = { createProductController, getProductController };

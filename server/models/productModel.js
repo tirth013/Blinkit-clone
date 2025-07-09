@@ -55,4 +55,10 @@ const productSchema = new mongoose.Schema(
   }
 );
 
+// create a text index
+productSchema.index(
+  { name: "text", description: "text" },
+  { weights: { name: 10, description: 5 } }
+);
+
 module.exports = mongoose.model("product", productSchema);
