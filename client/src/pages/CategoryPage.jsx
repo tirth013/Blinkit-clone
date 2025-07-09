@@ -4,11 +4,18 @@ import Loading from "../components/Loading";
 import NoData from "../components/NoData";
 import Axios from "../utils/Axios";
 import SummaryApi from "../common/SummaryApi";
+import EditCategory from "../components/EditCategory";
+import ConfirmBox from "../components/ConfirmBox";
 
 const CategoryPage = () => {
   const [openUploadCategory, setOpenUploadCategory] = useState(false);
   const [loading, setLoading] = useState(false);
   const [categoryData, setCategoryData] = useState([]);
+  const [editCategory, setEditCategory] = useState(null);
+  const [openConfirmBoxDelete, setOpenConfirmBoxDelete] = useState(false);
+  const [deleteCategory, setDeleteCategory] = useState({
+    _id: "",
+  });
 
   const fetchCategory = async () => {
     try {
@@ -29,6 +36,25 @@ const CategoryPage = () => {
   useEffect(() => {
     fetchCategory();
   }, []);
+
+  const handleDeleteCategory = async () => {
+    try {
+      setLoading(true);
+      await Axios({
+        ...SummaryApi.deleteCategory,
+        data: { _id: deleteCategory._id },
+        // Axios requires this for DELETE with body
+        headers: { "Content-Type": "application/json" },
+      });
+      setOpenConfirmBoxDelete(false);
+      setDeleteCategory({ _id: "" });
+      fetchCategory();
+    } catch (error) {
+      alert(error?.response?.data?.message || "Failed to delete category");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <section className="min-h-[80vh] bg-gray-50 p-6 rounded-lg shadow-md">
@@ -82,6 +108,51 @@ const CategoryPage = () => {
                 >
                   {category.name}
                 </span>
+                <div className="justify-center gap-2 mt-2 hidden group-hover:flex">
+                  <button
+                    className="flex items-center gap-1 px-4 py-1 text-xs font-semibold bg-yellow-400 text-black rounded-full shadow hover:bg-yellow-500 transition-colors duration-200 border border-yellow-300 focus:outline-none focus:ring-2 focus:ring-yellow-300"
+                    onClick={() => setEditCategory(category)}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="w-4 h-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-2.828 0L9 13zm-6 6h6"
+                      />
+                    </svg>
+                    Edit
+                  </button>
+                  <button
+                    className="flex items-center gap-1 px-4 py-1 text-xs font-semibold bg-red-500 text-white rounded-full shadow hover:bg-red-600 transition-colors duration-200 border border-red-400 focus:outline-none focus:ring-2 focus:ring-red-300"
+                    onClick={() => {
+                      setOpenConfirmBoxDelete(true);
+                      setDeleteCategory(category)
+                    }}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="w-4 h-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                    Delete
+                  </button>
+                </div>
               </div>
             </div>
           );
@@ -95,7 +166,23 @@ const CategoryPage = () => {
           fetchData={fetchCategory}
           close={() => {
             setOpenUploadCategory(false);
+            setEditCategory(null);
           }}
+          editData={editCategory}
+        />
+      )}
+      {editCategory && (
+        <EditCategory
+          editData={editCategory}
+          close={() => setEditCategory(null)}
+          fetchData={fetchCategory}
+        />
+      )}
+      {openConfirmBoxDelete && (
+        <ConfirmBox
+          close={() => setOpenConfirmBoxDelete(false)}
+          cancel={() => setOpenConfirmBoxDelete(false)}
+          confirm={handleDeleteCategory}
         />
       )}
     </section>
