@@ -1,7 +1,7 @@
 import Axios from "./Axios";
 import SummaryApi from "../common/SummaryApi";
 
-export const fetchUserDetails = async () => {
+const fetchUserDetails = async () => {
   try {
     const response = await Axios({
       method: SummaryApi.userDetails.method,
@@ -13,3 +13,5 @@ export const fetchUserDetails = async () => {
     throw error;
   }
 };
+
+export default fetchUserDetails;
