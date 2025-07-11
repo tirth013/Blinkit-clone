@@ -54,10 +54,17 @@ const UploadProduct = () => {
   // Handle image file input
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
-    setImageFiles(prev => [...prev, ...files]);
-    setImagePreviews(prev => [...prev, ...files.map(file => URL.createObjectURL(file))]);
-    e.target.value = ""; 
+    setImageFiles(files);
+    setImagePreviews(files.map(file => URL.createObjectURL(file)));
+    e.target.value = "";
   };
+
+  // Cleanup image previews on unmount
+  useEffect(() => {
+    return () => {
+      imagePreviews.forEach(url => URL.revokeObjectURL(url));
+    };
+  }, []);
 
   // Handle more_details dynamic fields
   const handleMoreDetailChange = (idx, field, value) => {
@@ -73,12 +80,60 @@ const UploadProduct = () => {
   // Remove image from preview and files
   const handleRemoveImage = (idx) => {
     setImageFiles(prev => prev.filter((_, i) => i !== idx));
-    setImagePreviews(prev => prev.filter((_, i) => i !== idx));
+    setImagePreviews(prev => {
+      const newPreviews = prev.filter((_, i) => i !== idx);
+      // Cleanup the removed URL
+      if (prev[idx]) {
+        URL.revokeObjectURL(prev[idx]);
+      }
+      return newPreviews;
+    });
   };
 
   // On submit
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Debug logging
+    console.log("Image files:", imageFiles);
+    console.log("Image files length:", imageFiles.length);
+    console.log("Image previews:", imagePreviews);
+    console.log("Image previews length:", imagePreviews.length);
+    
+    // Validate required fields
+    if (!data.name.trim()) {
+      toast.error("Product name is required");
+      return;
+    }
+    if (imageFiles.length === 0 && imagePreviews.length === 0) {
+      toast.error(`At least one image is required. Current: ${imageFiles.length} files, ${imagePreviews.length} previews`);
+      return;
+    }
+    if (data.category.length === 0) {
+      toast.error("At least one category is required");
+      return;
+    }
+    if (data.subCategory.length === 0) {
+      toast.error("At least one subcategory is required");
+      return;
+    }
+    if (!data.unit.trim()) {
+      toast.error("Unit is required");
+      return;
+    }
+    if (!data.stock || data.stock <= 0) {
+      toast.error("Valid stock quantity is required");
+      return;
+    }
+    if (!data.price || data.price <= 0) {
+      toast.error("Valid price is required");
+      return;
+    }
+    if (!data.description.trim()) {
+      toast.error("Description is required");
+      return;
+    }
+    
     setLoading(true);
     try {
       // Upload images
@@ -101,8 +156,8 @@ const UploadProduct = () => {
         price: Number(data.price),
         discount: Number(data.discount) || 0,
       };
-      // Send to backend (add endpoint to SummaryApi if needed)
-      await Axios.post(SummaryApi.addProduct.url, payload);
+      // Send to backend
+      await Axios.post(SummaryApi.createProduct.url, payload);
       toast.success("Product uploaded");
       setData({
         name: "",
@@ -168,6 +223,11 @@ const UploadProduct = () => {
               className="font-sans bg-blue-50 p-2 outline-none border focus-within:border-yellow-500 rounded"
               required
             />
+            {imageFiles.length > 0 && (
+              <div className="text-sm text-green-600 font-medium">
+                {imageFiles.length} image(s) selected
+              </div>
+            )}
             <div className="flex gap-2 mt-2">
               {imagePreviews.map((src, i) => (
                 <div key={i} className="relative inline-block">

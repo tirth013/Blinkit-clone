@@ -38,17 +38,17 @@ const createProductController = asyncHandler(async (req, res) => {
   if (!Array.isArray(image) || image.length === 0) {
     return res
       .status(400)
-      .json({ success: false, message: "Image must be a non-empty array." });
+      .json({ success: false, message: "At least one image is required." });
   }
   if (!Array.isArray(category) || category.length === 0) {
     return res
       .status(400)
-      .json({ success: false, message: "Category must be a non-empty array." });
+      .json({ success: false, message: "At least one category is required." });
   }
   if (!Array.isArray(subCategory) || subCategory.length === 0) {
     return res.status(400).json({
       success: false,
-      message: "SubCategory must be a non-empty array.",
+      message: "At least one subcategory is required.",
     });
   }
 
