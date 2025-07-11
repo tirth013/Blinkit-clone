@@ -96,7 +96,7 @@ const UploadProduct = () => {
         price: Number(data.price),
         discount: Number(data.discount) || 0,
       };
-      // Send to backend (add endpoint to SummaryApi if needed)
+      // Send to backend
       await Axios.post(SummaryApi.addProduct.url, payload);
       toast.success("Product uploaded");
       setData({

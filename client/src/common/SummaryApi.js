@@ -84,8 +84,12 @@ const SummaryApi = {
   },
   // Product endpoints
   addProduct: {
-    url: "/api/product/add-product",
+    url: "/api/product",
     method: "post",
+  },
+  getProduct: {
+    url: "/api/product",
+    method: "get",
   },
 };
 
