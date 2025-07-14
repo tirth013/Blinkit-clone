@@ -49,11 +49,11 @@ const CategoryWiseProductDisplay = ({ id, name }) => {
   };
 
   const handleRedirectProductListpage = () => {
-    const subcategory = subCategoryData.find((sub) => String(sub.category) === String(id));
+    const matchingSubcategories = subCategoryData.filter((sub) => String(sub.category) === String(id));
+    const subcategory = matchingSubcategories[0];
     const url = `/${valideURLConvert(name)}-${id}/${valideURLConvert(
       subcategory?.name
     )}-${subcategory?._id}`;
-
     return url;
   };
 

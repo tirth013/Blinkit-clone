@@ -155,8 +155,45 @@ const getProductByCategory = asyncHandler(async (req, res) => {
   }
 });
 
+const getProductByCategoryAndSubCategory = asyncHandler(async(req, res) => {
+  let { categoryId, subCategoryId, page, limit } = req.body;
+
+  if (!categoryId || !subCategoryId) {
+    return res.status(400).json({
+      message: "Provide categoryId and subCategoryId.",
+      success: false
+    });
+  }
+
+  page = Number(page) || 1;
+  limit = Number(limit) || 10;
+
+  const query = {
+    category: { $in: [categoryId] },
+    subCategory: { $in: [subCategoryId] }
+  };
+
+  const skip = (page - 1) * limit;
+
+  const [data, dataCount] = await Promise.all([
+    productModel.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit),
+    productModel.countDocuments(query)
+  ]);
+
+  return res.status(200).json({
+    message: "Product list",
+    data: data,
+    totalCount: dataCount,
+    page: page,
+    limit: limit,
+    success: true,
+    error: false
+  });
+});
+
 module.exports = {
   addProductController,
   getProductController,
   getProductByCategory,
+  getProductByCategoryAndSubCategory
 };

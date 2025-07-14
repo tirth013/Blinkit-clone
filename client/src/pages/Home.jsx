@@ -55,7 +55,7 @@ const Home = () => {
       subcategory = subCategoryData.find(sub => String(sub.category) === String(category._id));
     }
     if (!category || !subcategory) {
-      console.log('Category or subcategory not found', { category, subcategory });
+      alert('Category or subcategory not found!');
       return;
     }
 

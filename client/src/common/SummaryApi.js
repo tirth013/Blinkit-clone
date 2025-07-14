@@ -1,5 +1,3 @@
-import axios from "axios";
-
 export const baseURL = "http://localhost:8080";
 
 const SummaryApi = {
@@ -93,6 +91,10 @@ const SummaryApi = {
   },
   getProductByCategory: {
     url: "/api/product/get-product-by-category",
+    method: "post",
+  },
+  getProductByCategoryAndSubCategory: {
+    url: "/api/product/get-product-by-category-and-subcategory",
     method: "post",
   },
 };
