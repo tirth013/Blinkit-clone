@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import Axios from "../utils/Axios";
 import SummaryApi from "../common/SummaryApi";
 import AxiosToastError from "../utils/AxiosToastError";
+import CategoryWiseProductDisplay from "../components/CategoryWiseProductDisplay";
 
 const Home = () => {
   const loadingCategory = useSelector((state) => state.product.loadingCategory);
@@ -38,15 +39,32 @@ const Home = () => {
     fetchProducts();
   }, []);
 
-  // Handle redirect to product list page for a category
-  const handleRedirectProductListpage = (id, cat) => {
-    const subcategory = subCategoryData.find((sub) =>
-      sub.category.some((c) => c._id === id)
-    );
-    if (!subcategory) return;
-    const url = `/${valideURLConvert(cat)}-${id}/${valideURLConvert(
-      subcategory.name
-    )}-${subcategory._id}`;
+  const handleRedirectProductPage = (item) => {
+    let category, subcategory;
+    if (item.category && item.subCategory) {
+      const categoryId = Array.isArray(item.category)
+        ? (item.category[0]?._id || item.category[0])
+        : item.category;
+      const subCategoryId = Array.isArray(item.subCategory)
+        ? (item.subCategory[0]?._id || item.subCategory[0])
+        : item.subCategory;
+      category = categoryData.find(cat => String(cat._id) === String(categoryId));
+      subcategory = subCategoryData.find(sub => String(sub._id) === String(subCategoryId));
+    } else if (item._id && item.name) {
+      category = item;
+      subcategory = subCategoryData.find(sub => String(sub.category) === String(category._id));
+    }
+    if (!category || !subcategory) {
+      console.log('Category or subcategory not found', { category, subcategory });
+      return;
+    }
+
+    // If category.name is an array, join with '--'
+    const categoryName = Array.isArray(category.name)
+      ? category.name.join('--')
+      : category.name;
+
+    const url = `/${categoryName}---${category._id}/${valideURLConvert(subcategory.name)}-${subcategory._id}`;
     navigate(url);
   };
 
@@ -67,35 +85,6 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Category Grid */}
-      {/* <div className="container mx-auto px-4 my-2 grid grid-cols-5 md:grid-cols-8 lg:grid-cols-10 gap-2">
-        {loadingCategory
-          ? Array.from({ length: 12 }).map((_, index) => (
-              <div
-                key={index + "loadingcategory"}
-                className="bg-white rounded p-4 min-h-36 grid gap-2 shadow animate-pulse"
-              >
-                <div className="bg-blue-100 min-h-24 rounded"></div>
-                <div className="bg-blue-100 h-8 rounded"></div>
-              </div>
-            ))
-          : categoryData.map((cat) => (
-              <div
-                key={cat._id + "displayCategory"}
-                className="w-full h-full cursor-pointer hover:shadow-lg transition rounded-lg bg-white p-2"
-                onClick={() => handleRedirectProductListpage(cat._id, cat.name)}
-              >
-                <div className="aspect-square flex items-center justify-center">
-                  <img
-                    src={cat.image || "/default-category.png"}
-                    className="w-full h-full object-scale-down"
-                    alt={cat.name}
-                  />
-                </div>
-              </div>
-            ))}
-      </div> */}
-
       {/* Product Grid Section */}
       <div className="container mx-auto px-4 my-8">
         <h2 className="text-xl font-bold mb-2 text-gray-800">All Products</h2>
@@ -108,7 +97,8 @@ const Home = () => {
             {products.map((product, idx) => (
               <div
                 key={product._id || idx}
-                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200 flex flex-col items-center"
+                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200 flex flex-col items-center cursor-pointer"
+                onClick={() => handleRedirectProductPage(product)}
               >
                 <div className="h-32 w-full bg-gray-100 flex items-center justify-center">
                   {product.image && product.image.length > 0 ? (
@@ -126,7 +116,10 @@ const Home = () => {
                   )}
                 </div>
                 <div className="p-2 w-full text-center">
-                  <h3 className="font-semibold text-base text-gray-800 truncate" title={product.name}>
+                  <h3
+                    className="font-semibold text-base text-gray-800 truncate"
+                    title={product.name}
+                  >
                     {product.name}
                   </h3>
                 </div>
@@ -135,6 +128,15 @@ const Home = () => {
           </div>
         )}
       </div>
+
+      {/* categorywise product display */}
+      {
+        categoryData.map((c,index)=>{
+          return(
+            <CategoryWiseProductDisplay key={c?._id + "CategorywiseProduct"} id={c?._id} name={c?.name}/>
+          )
+        })
+      }
     </section>
   );
 };

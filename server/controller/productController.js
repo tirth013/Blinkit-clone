@@ -1,5 +1,6 @@
-const Product = require("../models/productModel");
+const mongoose = require("mongoose");
 const asyncHandler = require("express-async-handler");
+const productModel = require("../models/productModel");
 
 // Add Product
 const addProductController = asyncHandler(async (req, res) => {
@@ -46,26 +47,22 @@ const addProductController = asyncHandler(async (req, res) => {
       .json({ success: false, message: "Category must be a non-empty array." });
   }
   if (!Array.isArray(subCategory) || subCategory.length === 0) {
-    return res
-      .status(400)
-      .json({
-        success: false,
-        message: "SubCategory must be a non-empty array.",
-      });
+    return res.status(400).json({
+      success: false,
+      message: "SubCategory must be a non-empty array.",
+    });
   }
 
   // Check for duplicate product name
-  const existingProduct = await Product.findOne({ name });
+  const existingProduct = await productModel.findOne({ name });
   if (existingProduct) {
-    return res
-      .status(400)
-      .json({
-        success: false,
-        message: "Product with this name already exists.",
-      });
+    return res.status(400).json({
+      success: false,
+      message: "Product with this name already exists.",
+    });
   }
 
-  const product = new Product({
+  const product = new productModel({
     name,
     image,
     category,
@@ -92,28 +89,74 @@ const getProductController = asyncHandler(async (req, res) => {
   page = parseInt(page);
   limit = parseInt(limit);
 
-  const query = search
-    ? { $text: { $search: search } }
-    : {};
+  const query = search ? { $text: { $search: search } } : {};
 
   const skip = (page - 1) * limit;
 
   const [data, totalCount] = await Promise.all([
-    Product.find(query)
+    productModel
+      .find(query)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .populate('category')
-      .populate('subCategory'),
-    Product.countDocuments(query)
+      .populate("category")
+      .populate("subCategory"),
+    productModel.countDocuments(query),
   ]);
   return res.json({
     message: "Product data",
     success: true,
     totalCount: totalCount,
     totalNoPage: Math.ceil(totalCount / limit),
-    data: data
+    data: data,
   });
 });
 
-module.exports = { addProductController, getProductController };
+const getProductByCategory = asyncHandler(async (req, res) => {
+  try {
+    // Accept category id from route param or query param
+    const id = req.params.id || req.query.id;
+    if (!id) {
+      return res.status(400).json({
+        message: "Provide category id",
+        success: false,
+      });
+    }
+
+    // Support single or multiple category ids
+    const ids = Array.isArray(id) ? id : [id];
+
+    // Validate all ids
+    const validIds = ids.filter(mongoose.Types.ObjectId.isValid);
+    if (validIds.length === 0) {
+      return res.status(400).json({
+        message: "Invalid category id(s)",
+        success: false,
+      });
+    }
+
+    const products = await productModel
+      .find({
+        category: { $in: validIds },
+      })
+      .limit(16);
+
+    return res.json({
+      message: "Category product list",
+      success: true,
+      data: products,
+    });
+  } catch (error) {
+    console.error("Error in getProductByCategory:", error);
+    res.status(500).json({
+      message: "Server error",
+      success: false,
+    });
+  }
+});
+
+module.exports = {
+  addProductController,
+  getProductController,
+  getProductByCategory,
+};

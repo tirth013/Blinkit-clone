@@ -4,8 +4,6 @@ import SummaryApi from "../common/SummaryApi";
 import uploadImage from "../utils/uploadImage";
 import { toast } from "react-hot-toast";
 
-const UNIT_OPTIONS = ["kg", "g", "l", "ml", "pcs", "pack", "dozen"];
-
 const UploadProduct = () => {
   const [data, setData] = useState({
     name: "",
@@ -201,18 +199,14 @@ const UploadProduct = () => {
           </div>
           <div className="grid gap-1">
             <label className="font-sans">Unit</label>
-            <select
+            <input
               name="unit"
               value={data.unit}
               onChange={handleChange}
               className="font-sans bg-blue-50 p-2 outline-none border focus-within:border-yellow-500 rounded"
               required
             >
-              <option value="" disabled>Select unit</option>
-              {UNIT_OPTIONS.map((u) => (
-                <option key={u} value={u}>{u}</option>
-              ))}
-            </select>
+            </input>
           </div>
           <div className="grid gap-1">
             <label className="font-sans">Stock</label>
