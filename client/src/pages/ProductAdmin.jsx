@@ -7,7 +7,7 @@ import ProductCardAdmin from "../components/ProductCardAdmin";
 const ProductAdmin = () => {
   const [productData, setProductData] = useState([]);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(8);
   const [loading, setLoading] = useState(false);
   const [totalPages, setTotalPages] = useState(0);
 
@@ -92,10 +92,6 @@ const ProductAdmin = () => {
 
           {totalPages > 1 && (
             <div className="flex flex-col items-center mt-6 gap-4">
-              {/* Page Info */}
-              <div className="text-sm text-gray-600">
-                Showing page {page} of {totalPages} ({productData.length} products)
-              </div>
               
               {/* Pagination Controls */}
               <div className="flex items-center justify-center gap-2">
@@ -120,32 +116,48 @@ const ProductAdmin = () => {
                 
                 {/* Page Numbers */}
                 <div className="flex items-center gap-1">
-                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    let pageNum;
-                    if (totalPages <= 5) {
-                      pageNum = i + 1;
-                    } else if (page <= 3) {
-                      pageNum = i + 1;
-                    } else if (page >= totalPages - 2) {
-                      pageNum = totalPages - 4 + i;
-                    } else {
-                      pageNum = page - 2 + i;
-                    }
-                    
-                    return (
+                  {/* Show first page and ellipsis if needed */}
+                  {page > 3 && totalPages > 5 && (
+                    <>
+                      <button
+                        onClick={() => handlePageChange(1)}
+                        className={`px-3 py-2 rounded-full text-sm font-medium bg-gray-200 text-gray-700 hover:bg-gray-300`}
+                      >1</button>
+                      <span className="px-2">...</span>
+                    </>
+                  )}
+                  {/* Show up to 5 page numbers centered around current page */}
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter(pageNum => {
+                      if (totalPages <= 5) return true;
+                      if (page <= 3) return pageNum <= 5;
+                      if (page >= totalPages - 2) return pageNum > totalPages - 5;
+                      return Math.abs(pageNum - page) <= 2;
+                    })
+                    .map(pageNum => (
                       <button
                         key={pageNum}
                         onClick={() => handlePageChange(pageNum)}
-                        className={`px-3 py-2 rounded text-sm font-medium ${
+                        className={`px-3 py-2 rounded-full text-sm font-semibold transition-colors duration-150 ${
                           page === pageNum
-                            ? "bg-yellow-500 text-black"
-                            : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                            ? "bg-yellow-500 text-black shadow"
+                            : "bg-gray-100 text-gray-700 hover:bg-yellow-200"
                         }`}
+                        style={{ minWidth: 36 }}
                       >
                         {pageNum}
                       </button>
-                    );
-                  })}
+                    ))}
+                  {/* Show last page and ellipsis if needed */}
+                  {page < totalPages - 2 && totalPages > 5 && (
+                    <>
+                      <span className="px-2">...</span>
+                      <button
+                        onClick={() => handlePageChange(totalPages)}
+                        className={`px-3 py-2 rounded-full text-sm font-medium bg-gray-200 text-gray-700 hover:bg-gray-300`}
+                      >{totalPages}</button>
+                    </>
+                  )}
                 </div>
                 
                 {/* Next Button */}
@@ -168,23 +180,7 @@ const ProductAdmin = () => {
                 </button>
               </div>
               
-              {/* Page Size Selector */}
-              <div className="flex items-center gap-2 text-sm">
-                <label htmlFor="pageSize" className="text-gray-600">
-                  Items per page:
-                </label>
-                <select
-                  id="pageSize"
-                  value={pageSize}
-                  onChange={(e) => handlePageSizeChange(e.target.value)}
-                  className="px-2 py-1 border border-gray-300 rounded text-sm"
-                >
-                  <option value={5}>5</option>
-                  <option value={10}>10</option>
-                  <option value={20}>20</option>
-                  <option value={50}>50</option>
-                </select>
-              </div>
+              
             </div>
           )}
         </>

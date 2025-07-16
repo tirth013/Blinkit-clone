@@ -43,12 +43,7 @@ const UploadProduct = () => {
   // Handle input changes
   const handleChange = (e) => {
     const { name, value, type, multiple, options } = e.target;
-    if (type === "select-multiple") {
-      const selected = Array.from(options).filter(o => o.selected).map(o => o.value);
-      setData(prev => ({ ...prev, [name]: selected }));
-    } else {
-      setData(prev => ({ ...prev, [name]: value }));
-    }
+    setData(prev => ({ ...prev, [name]: value }));
   };
 
   // Handle image file input
@@ -157,7 +152,7 @@ const UploadProduct = () => {
         discount: Number(data.discount) || 0,
       };
       // Send to backend
-      await Axios.post(SummaryApi.createProduct.url, payload);
+      await Axios.post(SummaryApi.addProduct.url, payload);
       toast.success("Product uploaded");
       setData({
         name: "",
@@ -248,7 +243,6 @@ const UploadProduct = () => {
             <label className="font-sans">Category</label>
             <select
               name="category"
-              multiple
               value={data.category}
               onChange={handleChange}
               className="font-sans bg-blue-50 p-2 outline-none border focus-within:border-yellow-500 rounded"
@@ -263,7 +257,6 @@ const UploadProduct = () => {
             <label className="font-sans">Sub Category</label>
             <select
               name="subCategory"
-              multiple
               value={data.subCategory}
               onChange={handleChange}
               className="font-sans bg-blue-50 p-2 outline-none border focus-within:border-yellow-500 rounded"
@@ -278,6 +271,7 @@ const UploadProduct = () => {
             <label className="font-sans">Unit</label>
             <input
               type="text"
+            <input
               name="unit"
               value={data.unit}
               onChange={handleChange}
@@ -285,6 +279,8 @@ const UploadProduct = () => {
               placeholder="e.g. kg, g, l, ml, pcs, pack, dozen"
               required
             />
+            >
+            </input>
           </div>
           <div className="grid gap-1">
             <label className="font-sans">Stock</label>

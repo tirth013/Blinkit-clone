@@ -11,6 +11,10 @@ html,
   text-size-adjust: 100%;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: 'Poppins', sans-serif;
   font-weight: 100;
@@ -18,3 +22,6 @@ body {
   @apply bg-blue-50 text-neutral-950
 }
 
+.scrollbar-none::-webit-scrollbar {
+  display: none;
+}

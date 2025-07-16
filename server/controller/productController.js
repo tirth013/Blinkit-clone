@@ -1,8 +1,9 @@
-const Product = require("../models/productModel");
+const mongoose = require("mongoose");
 const asyncHandler = require("express-async-handler");
+const productModel = require("../models/productModel");
 
 // Add Product
-const createProductController = asyncHandler(async (req, res) => {
+const addProductController = asyncHandler(async (req, res) => {
   const {
     name,
     image,
@@ -48,12 +49,12 @@ const createProductController = asyncHandler(async (req, res) => {
   if (!Array.isArray(subCategory) || subCategory.length === 0) {
     return res.status(400).json({
       success: false,
-      message: "At least one subcategory is required.",
+      message: "SubCategory must be a non-empty array.",
     });
   }
 
   // Check for duplicate product name
-  const existingProduct = await Product.findOne({ name });
+  const existingProduct = await productModel.findOne({ name });
   if (existingProduct) {
     return res.status(400).json({
       success: false,
@@ -61,7 +62,7 @@ const createProductController = asyncHandler(async (req, res) => {
     });
   }
 
-  const product = new Product({
+  const product = new productModel({
     name,
     image,
     category,
@@ -82,6 +83,7 @@ const createProductController = asyncHandler(async (req, res) => {
   });
 });
 
+// Get Products (paginated, with search)
 const getProductController = asyncHandler(async (req, res) => {
   let { page = 1, limit = 10, search = "" } = req.query;
   page = parseInt(page);
@@ -92,13 +94,14 @@ const getProductController = asyncHandler(async (req, res) => {
   const skip = (page - 1) * limit;
 
   const [data, totalCount] = await Promise.all([
-    Product.find(query)
+    productModel
+      .find(query)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .populate("category")
       .populate("subCategory"),
-    Product.countDocuments(query),
+    productModel.countDocuments(query),
   ]);
   return res.json({
     message: "Product data",
@@ -109,4 +112,88 @@ const getProductController = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = { createProductController, getProductController };
+const getProductByCategory = asyncHandler(async (req, res) => {
+  try {
+    // Accept category id from route param or query param
+    const id = req.params.id || req.query.id;
+    if (!id) {
+      return res.status(400).json({
+        message: "Provide category id",
+        success: false,
+      });
+    }
+
+    // Support single or multiple category ids
+    const ids = Array.isArray(id) ? id : [id];
+
+    // Validate all ids
+    const validIds = ids.filter(mongoose.Types.ObjectId.isValid);
+    if (validIds.length === 0) {
+      return res.status(400).json({
+        message: "Invalid category id(s)",
+        success: false,
+      });
+    }
+
+    const products = await productModel
+      .find({
+        category: { $in: validIds },
+      })
+      .limit(16);
+
+    return res.json({
+      message: "Category product list",
+      success: true,
+      data: products,
+    });
+  } catch (error) {
+    console.error("Error in getProductByCategory:", error);
+    res.status(500).json({
+      message: "Server error",
+      success: false,
+    });
+  }
+});
+
+const getProductByCategoryAndSubCategory = asyncHandler(async(req, res) => {
+  let { categoryId, subCategoryId, page, limit } = req.body;
+
+  if (!categoryId || !subCategoryId) {
+    return res.status(400).json({
+      message: "Provide categoryId and subCategoryId.",
+      success: false
+    });
+  }
+
+  page = Number(page) || 1;
+  limit = Number(limit) || 10;
+
+  const query = {
+    category: { $in: [categoryId] },
+    subCategory: { $in: [subCategoryId] }
+  };
+
+  const skip = (page - 1) * limit;
+
+  const [data, dataCount] = await Promise.all([
+    productModel.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit),
+    productModel.countDocuments(query)
+  ]);
+
+  return res.status(200).json({
+    message: "Product list",
+    data: data,
+    totalCount: dataCount,
+    page: page,
+    limit: limit,
+    success: true,
+    error: false
+  });
+});
+
+module.exports = {
+  addProductController,
+  getProductController,
+  getProductByCategory,
+  getProductByCategoryAndSubCategory
+};

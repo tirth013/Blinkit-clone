@@ -1,44 +1,143 @@
-import React from "react";
-import { FaBolt, FaLeaf, FaTags } from "react-icons/fa";
+import React, { useEffect, useState } from "react";
+import banner from "../assets/banner.jpg";
+import { useSelector } from "react-redux";
+import { valideURLConvert } from "../utils/valideURLConvert";
+import { useNavigate } from "react-router-dom";
+import Axios from "../utils/Axios";
+import SummaryApi from "../common/SummaryApi";
+import AxiosToastError from "../utils/AxiosToastError";
+import CategoryWiseProductDisplay from "../components/CategoryWiseProductDisplay";
 
 const Home = () => {
+  const loadingCategory = useSelector((state) => state.product.loadingCategory);
+  const categoryData = useSelector((state) => state.product.allCategory);
+  const subCategoryData = useSelector((state) => state.product.allSubCategory);
+  const navigate = useNavigate();
+
+  // Product state
+  const [products, setProducts] = useState([]);
+  const [loadingProducts, setLoadingProducts] = useState(false);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoadingProducts(true);
+        const res = await Axios({
+          ...SummaryApi.getProduct,
+          params: { page: 1, limit: 24 }, // fetch first 24 products
+        });
+        const { data: responseData } = res;
+        if (responseData.success) {
+          setProducts(responseData.data);
+        }
+      } catch (error) {
+        AxiosToastError(error);
+      } finally {
+        setLoadingProducts(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  const handleRedirectProductPage = (item) => {
+    let category, subcategory;
+    if (item.category && item.subCategory) {
+      const categoryId = Array.isArray(item.category)
+        ? (item.category[0]?._id || item.category[0])
+        : item.category;
+      const subCategoryId = Array.isArray(item.subCategory)
+        ? (item.subCategory[0]?._id || item.subCategory[0])
+        : item.subCategory;
+      category = categoryData.find(cat => String(cat._id) === String(categoryId));
+      subcategory = subCategoryData.find(sub => String(sub._id) === String(subCategoryId));
+    } else if (item._id && item.name) {
+      category = item;
+      subcategory = subCategoryData.find(sub => String(sub.category) === String(category._id));
+    }
+    if (!category || !subcategory) {
+      alert('Category or subcategory not found!');
+      return;
+    }
+
+    // If category.name is an array, join with '--'
+    const categoryName = Array.isArray(category.name)
+      ? category.name.join('--')
+      : category.name;
+
+    const url = `/${categoryName}---${category._id}/${valideURLConvert(subcategory.name)}-${subcategory._id}`;
+    navigate(url);
+  };
+
   return (
-    <div className="bg-gray-900 min-h-screen pt-8 pb-16 px-4 md:px-0">
-      {/* Hero Section */}
-      <section className="max-w-4xl mx-auto flex flex-col md:flex-row items-center gap-8 md:gap-16 py-8">
-        {/* Text Content */}
-        <div className="flex-1 text-center md:text-left">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-yellow-400 mb-4">Groceries delivered in minutes</h1>
-          <p className="text-lg text-gray-300 mb-6">Experience the fastest delivery of fresh groceries and daily essentials right at your doorstep with Blinkit Clone.</p>
-          <button className="bg-yellow-400 text-gray-900 font-bold px-6 py-2 rounded-full shadow hover:bg-yellow-300 transition-colors">Shop Now</button>
+    <section className="bg-white">
+      {/* Banner Section */}
+      <div className="container mx-auto">
+        <div
+          className={`w-full min-h-48 bg-blue-100 rounded-2xl shadow overflow-hidden flex items-center justify-center ${
+            !banner ? "animate-pulse my-2" : ""
+          }`}
+        >
+          <img
+            src={banner}
+            className="w-full h-full object-cover"
+            alt="banner"
+          />
         </div>
-        {/* Image/Illustration Placeholder */}
-        <div className="flex-1 flex justify-center">
-          <div className="w-56 h-56 bg-gray-800 rounded-2xl flex items-center justify-center shadow-inner">
-            {/* You can replace this with an actual image later */}
-            <span className="text-7xl text-yellow-400">🛒</span>
+      </div>
+
+      {/* Product Grid Section */}
+      <div className="container mx-auto px-4 my-8">
+        <h2 className="text-xl font-bold mb-2 text-gray-800">All Products</h2>
+        {loadingProducts ? (
+          <div className="text-gray-500">Loading products...</div>
+        ) : products.length === 0 ? (
+          <div className="text-gray-400">No products found.</div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {products.map((product, idx) => (
+              <div
+                key={product._id || idx}
+                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200 flex flex-col items-center cursor-pointer"
+                onClick={() => handleRedirectProductPage(product)}
+              >
+                <div className="h-32 w-full bg-gray-100 flex items-center justify-center">
+                  {product.image && product.image.length > 0 ? (
+                    <img
+                      src={product.image[0]}
+                      alt={product.name}
+                      className="h-full w-full object-contain"
+                    />
+                  ) : (
+                    <img
+                      src="/default-product.png"
+                      alt="No Image"
+                      className="h-full w-full object-contain opacity-60"
+                    />
+                  )}
+                </div>
+                <div className="p-2 w-full text-center">
+                  <h3
+                    className="font-semibold text-base text-gray-800 truncate"
+                    title={product.name}
+                  >
+                    {product.name}
+                  </h3>
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
-      </section>
-      {/* Features Section */}
-      <section className="max-w-4xl mx-auto mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="flex flex-col items-center text-center">
-          <FaBolt className="text-yellow-400 text-4xl mb-2" />
-          <h3 className="text-xl font-semibold text-white mb-1">Super Fast Delivery</h3>
-          <p className="text-gray-400 text-sm">Get your groceries delivered in just minutes, anytime you need them.</p>
-        </div>
-        <div className="flex flex-col items-center text-center">
-          <FaLeaf className="text-yellow-400 text-4xl mb-2" />
-          <h3 className="text-xl font-semibold text-white mb-1">Fresh Products</h3>
-          <p className="text-gray-400 text-sm">We ensure the freshest fruits, vegetables, and daily essentials for you.</p>
-        </div>
-        <div className="flex flex-col items-center text-center">
-          <FaTags className="text-yellow-400 text-4xl mb-2" />
-          <h3 className="text-xl font-semibold text-white mb-1">Best Prices</h3>
-          <p className="text-gray-400 text-sm">Enjoy amazing deals and discounts on all your favorite products.</p>
-        </div>
-      </section>
-    </div>
+        )}
+      </div>
+
+      {/* categorywise product display */}
+      {
+        categoryData.map((c,index)=>{
+          return(
+            <CategoryWiseProductDisplay key={c?._id + "CategorywiseProduct"} id={c?._id} name={c?.name}/>
+          )
+        })
+      }
+    </section>
   );
 };
 

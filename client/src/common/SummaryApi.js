@@ -1,5 +1,3 @@
-import axios from "axios";
-
 export const baseURL = "http://localhost:8080";
 
 const SummaryApi = {
@@ -83,8 +81,20 @@ const SummaryApi = {
     method: "delete",
   },
   // Product endpoints
-  createProduct: {
+  addProduct: {
     url: "/api/product/create",
+    method: "post",
+  },
+  getProduct: {
+    url: "/api/product/get",
+    method: "get",
+  },
+  getProductByCategory: {
+    url: "/api/product/get-product-by-category",
+    method: "post",
+  },
+  getProductByCategoryAndSubCategory: {
+    url: "/api/product/get-product-by-category-and-subcategory",
     method: "post",
   },
   getProduct: {

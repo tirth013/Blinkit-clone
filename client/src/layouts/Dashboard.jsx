@@ -7,9 +7,7 @@ import { useEffect } from "react";
 const Dashboard = () => {
   const user = useSelector((state) => state.user);
 
-  useEffect(() => {
-    console.log("user dashboard", user);
-  }, [user]);
+  useEffect(() => {}, [user]);
 
   return (
     <section className="bg-[rgb(229,236,245)] min-h-screen w-full py-8">
