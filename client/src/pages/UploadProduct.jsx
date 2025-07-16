@@ -271,7 +271,6 @@ const UploadProduct = () => {
             <label className="font-sans">Unit</label>
             <input
               type="text"
-            <input
               name="unit"
               value={data.unit}
               onChange={handleChange}
@@ -279,8 +278,6 @@ const UploadProduct = () => {
               placeholder="e.g. kg, g, l, ml, pcs, pack, dozen"
               required
             />
-            >
-            </input>
           </div>
           <div className="grid gap-1">
             <label className="font-sans">Stock</label>
